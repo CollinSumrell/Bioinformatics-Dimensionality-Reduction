@@ -108,10 +108,8 @@ class ThreeDData(ThreeDScene):
 
         # Remove the original points and projection lines, keep the projected points
         self.play(
-            # FadeOut(points),
             FadeOut(projection_lines),
             ReplacementTransform(points, projected_points),
-            # FadeIn(projected_points),
             run_time=2
         )
         self.wait(1)
@@ -141,20 +139,15 @@ class ThreeDData(ThreeDScene):
         
         self.next_section()
 
-        # Apply rotation to the plane, projected points, and axes
+        # Apply rotation to the plane and projected points, and remove plane
         self.play(
             plane.animate.apply_function(rotate_point),
             projected_points.animate.apply_function(rotate_point),
             FadeOut(plane),
-            # axes.animate.apply_function(rotate_point),
             run_time=3
         )
         self.wait(1)
         self.stop_ambient_camera_rotation()
-
-        # Remove the plane (since it's now aligned with the xy-plane)
-        # self.play(, run_time=1)
-        # self.wait(1)
 
         # Add 2D axes to the scene
         axes2d = Axes(
@@ -162,10 +155,6 @@ class ThreeDData(ThreeDScene):
             y_range=[-5, 5, 1],
             tips=False
         )
-
-        # Transform the 3D axes to 2D axes
-        # self.play( run_time=2)
-        # self.wait(1)
 
         # Transform the projected points into 2D dots
         projected_points_2d = VGroup()
@@ -177,8 +166,7 @@ class ThreeDData(ThreeDScene):
             projected_points_2d.add(dot2d)
 
         # Replace the 3D projected points with the 2D projected points
-
-        # self.set_camera_orientation(phi=70 * DEGREES, theta=45 * DEGREES)
+        # and the 3D axes with the 2D axes
         self.move_camera(phi=0 * DEGREES, theta=90 * DEGREES)
         self.play(ReplacementTransform(axes, axes2d), ReplacementTransform(projected_points, projected_points_2d), run_time=2)
         self.wait()
