@@ -176,7 +176,7 @@ if __name__ == "__main__":
     ]
 
     # Perform PCA keeping all components
-    projectedData, eigenValues, eigenVectors = pca(data)
+    projectedData, eigenValues, eigenVectors = pca(data,2)
 
     print("\nProjected Data:")
     for row in projectedData:
