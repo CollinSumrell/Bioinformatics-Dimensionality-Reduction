@@ -1,5 +1,14 @@
 import math 
 
+import sys
+from pathlib import Path
+
+# Add the utils folder to the Python path
+sys.path.append(str(Path(__file__).resolve().parent.parent / "utils"))
+
+# Import the function
+from csv_reader import readCSV
+
 def transpose(matrix):
     #this exploits the way zip works by essentially turning each row
     #of the matrix into a backwards list, and then turning that into
@@ -28,7 +37,6 @@ def getCovarianceMatrix(data):
 
     nRow = len(data) #samples
     nCol = len(data[0]) #features
-
 
     covMatrix = [[0 for _ in range(nCol)] for _ in range(nCol)] #this just initializes our array hence the "_"
 
@@ -167,16 +175,29 @@ if __name__ == "__main__":
     
     #TODO: Load in a csv from 10x
     print("start")
-    data = [
-        [2.5, 2.4, 0.5],
-        [0.5, 0.7, 0.3],
-        [2.2, 2.9, 0.6],
-        [1.9, 2.2, 0.4],
-        [3.1, 3.0, 0.9]
-    ]
+    # data = [
+    #     [2.5, 2.4, 0.5],
+    #     [0.5, 0.7, 0.3],
+    #     [2.2, 2.9, 0.6],
+    #     [1.9, 2.2, 0.4],
+    #     [3.1, 3.0, 0.9]
+    # ]
+
+    data, barcodes, features = readCSV("cells_CRC_0_A1_20220122143309lib1_z.csv")
+
+    try: #converting our data to numeric since for some reason it comes in string form when we read it from the CSV
+        data = [[float(value) for value in row] for row in data]
+    except ValueError as e:
+        print(f"Error converting data to numeric: {e}")
+        sys.exit(1)
+
+    print(data[1])
+
+    print(data[1])
 
     # Perform PCA keeping all components
     projectedData, eigenValues, eigenVectors = pca(data,2)
+
 
     print("\nProjected Data:")
     for row in projectedData:
