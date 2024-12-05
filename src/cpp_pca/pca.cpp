@@ -6,50 +6,62 @@
 #include <string>
 #include <algorithm>
 #include <filesystem>
+#include <Eigen/Dense>
 
 using namespace std;
 
 typedef vector<vector<double>> Matrix;
 
-// Function to subtract the mean of each column (feature) from the dataset
-Matrix center_data(const Matrix& data) {
-    cout << "Started centering" << "\n";
+Matrix centerData(const Matrix& data) {
+    //this thang centers our data
+
+    cout << "Centering data..." << "\n";
     int n = data.size();
     int m = data[0].size();
-    Matrix centered_data = data;
+    Matrix centered = data;
     
     for (int j = 0; j < m; j++) {
-        cout << j;
+        //cout << j;
 
-        double column_sum = 0;
+        double colSum = 0;
         for (int i = 0; i < n; i++) {
-            column_sum += data[i][j];
+            colSum += data[i][j];
         }
-        double mean = column_sum / n;
+        double mean = colSum / n;
         for (int i = 0; i < n; i++) {
-            centered_data[i][j] -= mean;
+            centered[i][j] -= mean;
         }
     }
-    return centered_data;
+    return centered;
 }
 
 // Function to calculate the covariance matrix
 Matrix covariance_matrix(const Matrix& data) {
-    int n = data.size();
-    int m = data[0].size();
-    Matrix cov_matrix(m, vector<double>(m, 0));
+    cout << "Finding covariance matrix...";
 
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < m; j++) {
-            double cov = 0;
-            for (int k = 0; k < n; k++) {
-                cov += data[k][i] * data[k][j];
-            }
-            cov /= (n - 1);  // Sample covariance (n-1)
-            cov_matrix[i][j] = cov;
+    int n = data.size();    // Number of samples
+    int m = data[0].size(); // Number of features
+
+    // Convert input data to Eigen matrix
+    Eigen::MatrixXd eigenData(n, m);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            eigenData(i, j) = data[i][j];
         }
     }
-    return cov_matrix;
+
+    // Compute the covariance matrix directly
+    Eigen::MatrixXd covMatrix = (eigenData.transpose() * eigenData) / (n - 1);
+
+    // Convert the result back to std::vector<std::vector<double>>
+    Matrix result(m, std::vector<double>(m));
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < m; ++j) {
+            result[i][j] = covMatrix(i, j);
+        }
+    }
+
+    return result;
 }
 
 // Helper function to compute the magnitude of a vector
@@ -79,12 +91,12 @@ tuple<Matrix, vector<double>, Matrix> pca(const Matrix& data, int num_components
     cout << "actually starting pca for real this time (maybe)" << "\n";
 
     // Step 1: Center the data
-    Matrix centered_data = center_data(data);
+    Matrix centered = centerData(data);
 
     cout << "Data centered..." << "\n";
 
     // Step 2: Compute covariance matrix
-    Matrix cov_matrix = covariance_matrix(centered_data);
+    Matrix cov_matrix = covariance_matrix(centered);
 
     cout << "Covariance matrix computed..." << "\n";
 
@@ -123,7 +135,7 @@ tuple<Matrix, vector<double>, Matrix> pca(const Matrix& data, int num_components
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < num_components; j++) {
             for (int k = 0; k < m; k++) {
-                transformed_data[i][j] += centered_data[i][k] * top_eigenvectors[j][k];
+                transformed_data[i][j] += centered[i][k] * top_eigenvectors[j][k];
             }
         }
     }
@@ -154,7 +166,7 @@ bool readCSV(const string& filename, Matrix& data) {
     while (getline(file, line)) { // Read each remaining line from the file
         stringstream ss(line); // Create a stringstream object for splitting the line
         string cell;
-        vector<string> row; // To store the split cells
+        vector<double> row; // To store the split cells
 
         bool firstCell = true; // Flag to skip the first cell
         while (getline(ss, cell, ',')) { // Split by comma
@@ -162,14 +174,18 @@ bool readCSV(const string& filename, Matrix& data) {
                 firstCell = false; // Skip the first cell in the row
                 continue;
             }
-            row.push_back(cell); // Add subsequent cells to the row
+            try {
+                double value = stod(cell);
+                row.push_back(value);
+            } catch (const invalid_argument& e) {
+                cerr << "Invalid number: " << cell << endl;
+                return false;
+            }
         }
 
-        // Optionally, print the row or process it
-        // for (const auto& value : row) {
-        //     cout << value << " "; // Print each cell in the row
-        // }
-        cout << endl;
+        if(!row.empty()){
+            data.push_back(row);
+        }
     }
 
     file.close(); // Close the file
