@@ -41,7 +41,7 @@ class LinearTransformationSceneExample(LinearTransformationScene):
         x_projected_points = np.array([[x, 0] for x, y in points])
         x_projected_dots = VGroup(
             *[
-                Dot(self.plane.coords_to_point(x, y), color=GREEN)
+                Dot(self.plane.coords_to_point(x, y), color=ORANGE)
                 for x, y in x_projected_points
             ]
         )
@@ -56,7 +56,7 @@ class LinearTransformationSceneExample(LinearTransformationScene):
         y_projected_points = np.array([[0, y] for x, y in points])
         y_projected_dots = VGroup(
             *[
-                Dot(self.plane.coords_to_point(x, y), color=YELLOW)
+                Dot(self.plane.coords_to_point(x, y), color=ORANGE)
                 for x, y in y_projected_points
             ]
         )
@@ -74,7 +74,7 @@ class LinearTransformationSceneExample(LinearTransformationScene):
         centered_points = points - centroid
         centered_dots = VGroup(
             *[
-                Dot(self.plane.coords_to_point(x, y), color=BLUE)
+                Dot(self.plane.coords_to_point(x, y), color=YELLOW)
                 for x, y in centered_points
             ]
         )
@@ -110,4 +110,20 @@ class LinearTransformationSceneExample(LinearTransformationScene):
         self.apply_matrix(transformation_matrix)
 
         # Keep everything visible after transformation
+        self.wait()
+
+        self.apply_matrix((transformation_matrix / eigenvalues).T)
+
+        self.wait()
+
+        # Collapse points vertically to the x-axis
+        collapsed_dots = VGroup(
+            *[
+                Dot(self.plane.coords_to_point(self.plane.point_to_coords(dot.get_center())[0], 0), color=YELLOW)
+                for dot in initial_dots
+            ]
+        )
+
+        # Animate points collapsing to the x-axis
+        self.play(Transform(initial_dots, collapsed_dots))
         self.wait()
