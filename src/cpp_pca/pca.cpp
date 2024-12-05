@@ -16,8 +16,8 @@ Matrix centerData(const Matrix& data) {
     //this thang centers our data
 
     cout << "Centering data..." << "\n";
-    int n = data.size();
-    int m = data[0].size();
+    int n = data.size(); //samples
+    int m = data[0].size(); //features
     Matrix centered = data;
     
     for (int j = 0; j < m; j++) {
@@ -36,7 +36,7 @@ Matrix centerData(const Matrix& data) {
 }
 
 // Function to calculate the covariance matrix
-Matrix covariance_matrix(const Matrix& data) {
+Matrix covarianceMatrix(const Matrix& data) {
     cout << "Finding covariance matrix...";
 
     int n = data.size();    // Number of samples
@@ -53,7 +53,7 @@ Matrix covariance_matrix(const Matrix& data) {
     // Compute the covariance matrix directly
     Eigen::MatrixXd covMatrix = (eigenData.transpose() * eigenData) / (n - 1);
 
-    // Convert the result back to std::vector<std::vector<double>>
+    // Convert the result back to Matrix form out of Eigen form 
     Matrix result(m, std::vector<double>(m));
     for (int i = 0; i < m; ++i) {
         for (int j = 0; j < m; ++j) {
@@ -64,18 +64,20 @@ Matrix covariance_matrix(const Matrix& data) {
     return result;
 }
 
+//Use these later :) 
+
 // Helper function to compute the magnitude of a vector
-double vector_magnitude(const vector<double>& vec) {
-    double sum_of_squares = 0;
+double vectorMagnitude(const vector<double>& vec) {
+    double sumOfSquares = 0;
     for (double val : vec) {
-        sum_of_squares += val * val;
+        sumOfSquares += val * val;
     }
-    return sqrt(sum_of_squares);
+    return sqrt(sumOfSquares);
 }
 
 // Function to normalize a vector
 vector<double> normalize(const vector<double>& vec) {
-    double magnitude = vector_magnitude(vec);
+    double magnitude = vectorMagnitude(vec);
     vector<double> normalized(vec.size());
     for (size_t i = 0; i < vec.size(); ++i) {
         normalized[i] = vec[i] / magnitude;
@@ -84,7 +86,7 @@ vector<double> normalize(const vector<double>& vec) {
 }
 
 // Function to perform PCA using the covariance matrix (simplified, assumes diagonalization is possible)
-tuple<Matrix, vector<double>, Matrix> pca(const Matrix& data, int num_components) {
+tuple<Matrix, vector<double>, Matrix> pca(const Matrix& data, int numComponents) {
     int n = data.size();  // Number of data points
     int m = data[0].size();  // Number of features
 
@@ -113,31 +115,31 @@ tuple<Matrix, vector<double>, Matrix> pca(const Matrix& data, int num_components
     Eigen::VectorXd sortedEigenvalues = eigenvalues.reverse();
     Eigen::MatrixXd sortedEigenvectors = eigenvectors.rowwise().reverse();
 
-    Eigen::MatrixXd topEigenvectors = sortedEigenvectors.leftCols(num_components);
+    Eigen::MatrixXd topEigenvectors = sortedEigenvectors.leftCols(numComponents);
 
     Eigen::MatrixXd transformedData = eigenData * topEigenvectors;
     cout << "Projection completed..." << "\n";
 
-    Matrix top_eigenvectors(m, vector<double>(num_components));
+    Matrix top_eigenvectors(m, vector<double>(numComponents));
     for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < num_components; ++j) {
+        for (int j = 0; j < numComponents; ++j) {
             top_eigenvectors[i][j] = sortedEigenvectors(i, j);
         }
     }
 
-    vector<double> eigenvalues_vec(num_components);
-    for (int i = 0; i < num_components; ++i) {
+    vector<double> eigenvalues_vec(numComponents);
+    for (int i = 0; i < numComponents; ++i) {
         eigenvalues_vec[i] = sortedEigenvalues(i);
     }
 
-    Matrix transformedDataMatrix(n, vector<double>(num_components));
+    Matrix transformedDataMatrix(n, vector<double>(numComponents));
     for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < num_components; ++j) {
+        for (int j = 0; j < numComponents; ++j) {
             transformedDataMatrix[i][j] = transformedData(i, j);
         }
     }
 
-    return make_tuple(topEigenvectors, eigenvalues_vec, transformedDataMatrix);
+    return make_tuple(top_eigenvectors, eigenvalues_vec, transformedDataMatrix);
 }
 
 bool readCSV(const string& filename, Matrix& data) {
@@ -152,18 +154,18 @@ bool readCSV(const string& filename, Matrix& data) {
     }
 
      if (getline(file, line)) {
-        // Optionally, you can store or process the header here
+        //skips first line, if we want to store feature names I can save here later
     }
 
-    while (getline(file, line)) { // Read each remaining line from the file
-        stringstream ss(line); // Create a stringstream object for splitting the line
+    while (getline(file, line)) { 
+        stringstream ss(line); //splits line via stringstream object
         string cell;
-        vector<double> row; // To store the split cells
+        vector<double> row; //stores each split in numeric
 
-        bool firstCell = true; // Flag to skip the first cell
-        while (getline(ss, cell, ',')) { // Split by comma
+        bool firstCell = true; //flag to skip the first cell
+        while (getline(ss, cell, ',')) { //split by comma
             if (firstCell) {
-                firstCell = false; // Skip the first cell in the row
+                firstCell = false; //skip the first cell in the row
                 continue;
             }
             try {
@@ -204,13 +206,13 @@ int main() {
 
     
 
-    int num_components = 2;  // Number of principal components to keep
-    // pca(data, num_components);
-    auto [eigenvectors, eigenvalues, pca_result] = pca(data, num_components);
+    int numComponents = 10;  // Number of principal components to keep
+    // pca(data, numComponents);
+    auto [eigenVectors, eigenValues, result] = pca(data, numComponents);
 
     // Output the PCA result
     cout << "Eigenvectors:\n";
-    for (const auto& vec : eigenvectors) {
+    for (const auto& vec : eigenVectors) {
         for (double val : vec) {
             cout << val << " ";
         }
@@ -218,13 +220,13 @@ int main() {
     }
 
     cout << "\nEigenvalues:\n";
-    for (double val : eigenvalues) {
+    for (double val : eigenValues) {
         cout << val << " ";
     }
     cout << endl;
 
-    cout << "\nPCA Transformed Data (First " << num_components << " Components):\n";
-    for (const auto& row : pca_result) {
+    cout << "\nPCA Transformed Data (First " << numComponents << " Components):\n";
+    for (const auto& row : result) {
         for (double value : row) {
             cout << value << " ";
         }

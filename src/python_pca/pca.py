@@ -1,13 +1,11 @@
 import math 
-
 import sys
+import csv
+
 from pathlib import Path
 
 # Add the utils folder to the Python path
-sys.path.append(str(Path(__file__).resolve().parent.parent / "utils"))
-
-# Import the function
-from csv_reader import readCSV
+#sys.path.append(str(Path(__file__).resolve().parent.parent / "utils"))
 
 def transpose(matrix):
     #this exploits the way zip works by essentially turning each row
@@ -101,26 +99,25 @@ def deflate(matrix, eigenValue, eigenVector):
             matrix[i][j] -= eigenValue * eigenVector[i] * eigenVector[j]
     return matrix
 
+def readCSV(csvName):
+    # Initialize an empty list to store rows
+    data = []
+    features = []
+    barcodes = []
+
+    # Open and read the CSV file
+    with open(csvName, mode="r") as file:
+        reader = csv.reader(file)
+
+        features = next(reader)
+
+        for row in reader:
+            barcodes.append(row[0])
+            data.append(row[1:])  # Append each row as a list
+    
+    return data, barcodes, features
+
 def pca(data, numComponents=None):
-    """
-    Perform Principal Component Analysis (PCA) on the dataset.
-
-    Parameters:
-    -----------
-    data : list of lists
-        The data matrix with shape (n_samples, n_features).
-    n_components : int or None
-        Number of principal components to keep.
-
-    Returns:
-    --------
-    projected_data : list of lists
-        The data projected onto the principal components.
-    eigenvalues : list
-        The eigenvalues in decreasing order.
-    eigenvectors : list of lists
-        The corresponding eigenvectors.
-    """
     #Center data before doing anything else
     centeredData, means = centerData(data)
     print("Data centered. Mean of each feature set to zero.")
@@ -183,7 +180,11 @@ if __name__ == "__main__":
     #     [3.1, 3.0, 0.9]
     # ]
 
-    data, barcodes, features = readCSV("cells_CRC_0_A1_20220122143309lib1_z.csv")
+    datasetPath = Path(__file__).parent.parent.parent.parent / "datasets" / "csv"
+    binPath = Path(__file__).parent.parent.parent.parent / "bin"
+
+
+    data, barcodes, features = readCSV(datasetPath / "cells_CRC_0_A1_20220122143309lib1_z.csv")
 
     try: #converting our data to numeric since for some reason it comes in string form when we read it from the CSV
         data = [[float(value) for value in row] for row in data]
