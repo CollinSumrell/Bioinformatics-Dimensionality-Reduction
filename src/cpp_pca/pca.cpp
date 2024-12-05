@@ -88,64 +88,56 @@ tuple<Matrix, vector<double>, Matrix> pca(const Matrix& data, int num_components
     int n = data.size();  // Number of data points
     int m = data[0].size();  // Number of features
 
-    cout << "actually starting pca for real this time (maybe)" << "\n";
-
-    // Step 1: Center the data
     Matrix centered = centerData(data);
-
     cout << "Data centered..." << "\n";
 
-    // Step 2: Compute covariance matrix
-    Matrix cov_matrix = covariance_matrix(centered);
-
-    cout << "Covariance matrix computed..." << "\n";
-
-    // Step 3: Eigenvalue decomposition (simplified, uses basic method for eigenvalues/eigenvectors)
-    vector<vector<double>> eigenvectors(m, vector<double>(m, 0));  // For storing eigenvectors
-
-    // For simplicity, using identity matrix as initial guess for eigenvectors
-    for (int i = 0; i < m; i++) {
-        eigenvectors[i][i] = 1;
-    }
-
-    // Eigenvalues (diagonal values of the covariance matrix)
-    vector<double> eigenvalues(m, 0);
-    for (int i = 0; i < m; i++) {
-        eigenvalues[i] = cov_matrix[i][i];  // Simplified for this demonstration
-    }
-
-    // Step 4: Sort eigenvalues and corresponding eigenvectors in descending order
-    vector<pair<double, vector<double>>> eigen_pairs;
-    for (int i = 0; i < m; i++) {
-        eigen_pairs.push_back({eigenvalues[i], eigenvectors[i]});
-    }
-
-    sort(eigen_pairs.begin(), eigen_pairs.end(), greater<pair<double, vector<double>>>());
-
-    cout << "Eigenvectors computed..." << "\n";
-
-    // Select the top 'num_components' eigenvectors (principal components)
-    vector<vector<double>> top_eigenvectors;
-    for (int i = 0; i < num_components; i++) {
-        top_eigenvectors.push_back(eigen_pairs[i].second);
-    }
-
-    // Step 5: Project the data onto the top eigenvectors
-    vector<vector<double>> transformed_data(n, vector<double>(num_components, 0));
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < num_components; j++) {
-            for (int k = 0; k < m; k++) {
-                transformed_data[i][j] += centered[i][k] * top_eigenvectors[j][k];
-            }
+    Eigen::MatrixXd eigenData(n, m);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            eigenData(i, j) = centered[i][j];
         }
     }
 
+    Eigen::MatrixXd covMatrix = (eigenData.transpose() * eigenData) / (n - 1);
+    cout << "Covariance matrix calculated..." << "\n";
+
+    Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver(covMatrix);
+    if (eigensolver.info() != Eigen::Success) {
+        cerr << "Eigenvalue decomposition failed!" << endl;
+        exit(1);
+    }
+
+    Eigen::VectorXd eigenvalues = eigensolver.eigenvalues();
+    Eigen::MatrixXd eigenvectors = eigensolver.eigenvectors();
+
+    Eigen::VectorXd sortedEigenvalues = eigenvalues.reverse();
+    Eigen::MatrixXd sortedEigenvectors = eigenvectors.rowwise().reverse();
+
+    Eigen::MatrixXd topEigenvectors = sortedEigenvectors.leftCols(num_components);
+
+    Eigen::MatrixXd transformedData = eigenData * topEigenvectors;
     cout << "Projection completed..." << "\n";
 
-    // Return the eigenvectors, eigenvalues, and the transformed data
-    return make_tuple(top_eigenvectors, eigenvalues, transformed_data);
+    Matrix topEigenvectors(m, vector<double>(num_components));
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < num_components; ++j) {
+            topEigenvectors[i][j] = sortedEigenvectors(i, j);
+        }
+    }
 
-    cout << "PCA Computation Finished.";
+    vector<double> eigenvalues_vec(num_components);
+    for (int i = 0; i < num_components; ++i) {
+        eigenvalues_vec[i] = sortedEigenvalues(i);
+    }
+
+    Matrix transformedDataMatrix(n, vector<double>(num_components));
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < num_components; ++j) {
+            transformedDataMatrix[i][j] = transformedData(i, j);
+        }
+    }
+
+    return make_tuple(topEigenvectors, eigenvalues_vec, transformedDataMatrix);
 }
 
 bool readCSV(const string& filename, Matrix& data) {
