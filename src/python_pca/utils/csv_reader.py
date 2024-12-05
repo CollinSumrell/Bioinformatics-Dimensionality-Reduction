@@ -2,8 +2,8 @@ import csv
 from pathlib import Path
 
 #construct the path
-datasetPath = Path(__file__).parent.parent.parent / "datasets" 
-binPath = Path(__file__).parent.parent.parent / "bin"
+datasetPath = Path(__file__).parent.parent.parent.parent / "datasets" / "csv"
+binPath = Path(__file__).parent.parent.parent.parent / "bin"
 
 def readCSV(csvName):
     # Initialize an empty list to store rows
@@ -12,7 +12,7 @@ def readCSV(csvName):
     barcodes = []
 
     # Open and read the CSV file
-    with open(binPath / csvName, mode="r") as file:
+    with open(datasetPath / csvName, mode="r") as file:
         reader = csv.reader(file)
 
         features = next(reader)

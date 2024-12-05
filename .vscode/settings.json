@@ -1,0 +1,9 @@
+{
+    "python.analysis.extraPaths": [
+        "./src/python_pca/utils"
+    ],
+    "C_Cpp.errorSquiggles": "disabled",
+    "files.associations": {
+        "vector": "cpp"
+    }
+}

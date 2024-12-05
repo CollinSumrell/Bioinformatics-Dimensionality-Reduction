@@ -2,12 +2,7 @@
     "configurations": [
         {
             "name": "Mac",
-            "includePath": [
-                "${workspaceFolder}/src/c-pca/utils",  // Add this path
-                "${workspaceFolder}/src/c-pca/pca",   // Include path for your source files
-                "/usr/include/c++/10",                 // Standard library includes
-                "/usr/include/x86_64-linux-gnu",      // System includes
-                "/usr/include"                        // Other system includes
+            "includePath": [               // Other system includes
             ],
             "defines": [],
             "macFrameworkPath": [

@@ -79,7 +79,7 @@ csvPath = binPath / "matrix.csv"
 
 with open(csvPath, mode = "w", newline='') as csvfile:
     writer = csv.writer(csvfile)
-
+    
     # Write the header (feature names as columns)
     writer.writerow(["Barcode"] + features)
 
