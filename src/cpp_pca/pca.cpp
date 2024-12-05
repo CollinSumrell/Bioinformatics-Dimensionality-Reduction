@@ -118,10 +118,10 @@ tuple<Matrix, vector<double>, Matrix> pca(const Matrix& data, int num_components
     Eigen::MatrixXd transformedData = eigenData * topEigenvectors;
     cout << "Projection completed..." << "\n";
 
-    Matrix topEigenvectors(m, vector<double>(num_components));
+    Matrix top_eigenvectors(m, vector<double>(num_components));
     for (int i = 0; i < m; ++i) {
         for (int j = 0; j < num_components; ++j) {
-            topEigenvectors[i][j] = sortedEigenvectors(i, j);
+            top_eigenvectors[i][j] = sortedEigenvectors(i, j);
         }
     }
 
