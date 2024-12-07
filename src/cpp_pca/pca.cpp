@@ -13,29 +13,6 @@ using namespace std;
 
 typedef vector<vector<double>> Matrix;
 
-Matrix centerData(const Matrix& data) {
-    //this thang centers our data
-
-    cout << "Centering data..." << "\n";
-    int n = data.size(); //samples
-    int m = data[0].size(); //features
-    Matrix centered = data;
-    
-    for (int j = 0; j < m; j++) {
-        //cout << j;
-
-        double colSum = 0;
-        for (int i = 0; i < n; i++) {
-            colSum += data[i][j];
-        }
-        double mean = colSum / n;
-        for (int i = 0; i < n; i++) {
-            centered[i][j] -= mean;
-        }
-    }
-    return centered;
-}
-
 // Function to calculate the covariance matrix
 Matrix covarianceMatrix(const Matrix& data) {
     cout << "Finding covariance matrix...";
@@ -65,50 +42,31 @@ Matrix covarianceMatrix(const Matrix& data) {
     return result;
 }
 
-//Use these later :) 
+Matrix standardizeData(const Matrix& data) {
+    int n = (int) data.size();
+    int m = (int) data[0].size();
 
-// Helper function to compute the magnitude of a vector
-double vectorMagnitude(const vector<double>& vec) {
-    double sumOfSquares = 0;
-    for (double val : vec) {
-        sumOfSquares += val * val;
-    }
-    return sqrt(sumOfSquares);
-}
-
-// Function to normalize a vector
-vector<double> normalize(const vector<double>& vec) {
-    double magnitude = vectorMagnitude(vec);
-    vector<double> normalized(vec.size());
-    for (size_t i = 0; i < vec.size(); ++i) {
-        normalized[i] = vec[i] / magnitude;
-    }
-    return normalized;
-}
-
-Matrix normalizeData(const Matrix& data) {
-    int n = data.size();    // Number of rows (samples)
-    int m = data[0].size(); // Number of columns (features)
-
-    Matrix normalizedData = data;
+    Matrix standardized = data;
 
     for (int j = 0; j < m; ++j) {
-        // Extract column as a vector
-        vector<double> column(n);
-        for (int i = 0; i < n; ++i) {
-            column[i] = data[i][j];
+        double colSum = 0.0;
+        double colSumSq = 0.0;
+
+        for (int i = 0; i < n; i++) {
+            colSum += data[i][j];
+            colSumSq += data[i][j] * data[i][j];
         }
 
-        // Normalize the column
-        vector<double> normalizedColumn = normalize(column);
+        double mean = colSum / n;
+        double var = (colSumSq / n) - (mean * mean);
+        double stdDev = (var > 0) ? sqrt(var) : 1.0; // in case of zero variance
 
-        // Assign the normalized values back
-        for (int i = 0; i < n; ++i) {
-            normalizedData[i][j] = normalizedColumn[i];
+        for (int i = 0; i < n; i++) {
+            standardized[i][j] = (data[i][j] - mean) / stdDev;
         }
     }
 
-    return normalizedData;
+    return standardized;
 }
 
 // Function to perform PCA using the covariance matrix (simplified, assumes diagonalization is possible)
@@ -118,13 +76,10 @@ tuple<Matrix, vector<double>, Matrix> pca(const Matrix& data, int numComponents)
     int n = data.size();  // Number of data points
     int m = data[0].size();  // Number of features
 
-    Matrix centered = centerData(data);
-    cout << "Data centered..." << "\n";
-
     Eigen::MatrixXd eigenData(n, m);
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < m; ++j) {
-            eigenData(i, j) = centered[i][j];
+            eigenData(i, j) = data[i][j];
         }
     }
 
@@ -273,7 +228,7 @@ int main() {
         return 1;
     }
 
-    data = normalizeData(data);
+    data = standardizeData(data);
 
     int numComponents = 3;  // Number of principal components to keep
     // pca(data, numComponents);
