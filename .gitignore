@@ -1,7 +1,7 @@
 # PROJECT SPECIFIC STUFF
 .vscode
-bin
 test.py
+ignore/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

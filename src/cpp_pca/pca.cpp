@@ -193,7 +193,7 @@ bool readCSV(const string& filename, Matrix& data, vector<string> barcodes, bool
 }
 
 void writeToCSV(const Matrix& data, const string& filename) {
-    ofstream file(filename);
+    std::ofstream file(filename);
 
     if (!file.is_open()) {
         cerr << "Failed to open the file: " << filename << std::endl;
@@ -236,7 +236,7 @@ int main() {
     string datasetName = "wine";
     bool skipFirstCol = false; //if the dataset has built in row names, then skip 
 
-    bool saveData = true;
+    bool saveData = true; 
     bool printResults = false;
 
     vector<string> barcodes;
@@ -276,18 +276,19 @@ int main() {
         }
     }
 
-    std::string filename = "results/" + datasetName + "_" + std::to_string(numComponents) + "_PCs.csv";
+    string filename = "results/" + datasetName + "_" + std::to_string(numComponents) + "_PCs.csv";
 
-    writeToCSV(result, filename);
+    if(saveData){
+        writeToCSV(result,filename);
+    }
 
-    //end of our program and stopping the stopwatch
 
     auto end = chrono::high_resolution_clock::now();
 
     std::chrono::duration<double> elapsed = end - start;
 
     // Output the elapsed time in seconds
-    std::cout << "Function took " << elapsed.count() << " seconds to execute." << endl;
+    std::cout << "Function took " << elapsed.count() << " seconds to execute." << std::endl;
 
     return 0;
 }

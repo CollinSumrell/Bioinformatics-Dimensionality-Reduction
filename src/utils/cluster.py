@@ -8,7 +8,6 @@ from pathlib import Path
 
 #construct the path
 
-numClust = 4
 datasetName = "wine"
 
 datasetPath = Path(__file__).parent.parent.parent / "datasets" / "csv" / datasetName
@@ -26,7 +25,7 @@ scaler = StandardScaler()
 scaled_data = scaler.fit_transform(numeric_data)
 
 # Perform K-Means clustering
-kmeans = KMeans(n_clusters=numClust, random_state=42)  # Set n_clusters to the desired number of clusters
+kmeans = KMeans(n_clusters=3, random_state=42)  # Set n_clusters to the desired number of clusters
 kmeans.fit(scaled_data)
 
 # Add the cluster labels to the original data
@@ -35,4 +34,4 @@ data["Cluster"] = kmeans.labels_
 # Save the data with cluster labels to a new CSV file
 data.to_csv(str(datasetPath) + "_clusters.csv", index=False)
 
-print("Clustering complete")
+print("Clustering complete. Results saved to 'clustered_data.csv'.")
