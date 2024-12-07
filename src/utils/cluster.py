@@ -1,18 +1,14 @@
 import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
-
-# Load the CSV file
-
 from pathlib import Path
 
-#construct the path
-
+# Construct the paths
 datasetName = "wine"
-
 datasetPath = Path(__file__).parent.parent.parent / "datasets" / "csv" / datasetName
 outputPath = Path(__file__).parent.parent.parent / "results" / datasetName
 
+# Load the CSV file
 data = pd.read_csv(str(datasetPath) + ".csv")
 
 # Select only numeric columns
@@ -29,10 +25,10 @@ scaled_data = scaler.fit_transform(numeric_data)
 kmeans = KMeans(n_clusters=3, random_state=42)  # Set n_clusters to the desired number of clusters
 kmeans.fit(scaled_data)
 
-# Add the cluster labels to the original data
-data["Cluster"] = kmeans.labels_
+# Create a DataFrame for the cluster labels
+cluster_column = pd.DataFrame(kmeans.labels_, columns=["Cluster"])
 
-# Save the data with cluster labels to a new CSV file
-data.to_csv(str(outputPath) + "_clusters.csv", index=False)
+# Save only the cluster column to a new CSV file
+cluster_column.to_csv(str(outputPath) + "_clusters.csv", index=False)
 
-print("Clustering complete. Results saved to 'clustered_data.csv'.")
+print("Clustering complete. Only cluster column saved to the CSV.")

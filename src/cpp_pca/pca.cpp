@@ -175,13 +175,26 @@ bool readCSV(const string& filename, Matrix& data, vector<string> barcodes, bool
 }
 
 void writeToCSV(const Matrix& data, const string& filename) {
-    std::ofstream file(filename);
+    ofstream file(filename);
 
     if (!file.is_open()) {
-        cerr << "Failed to open the file: " << filename << std::endl;
+        cerr << "Failed to open the file: " << filename << endl;
         return;
     }
 
+    // Add headers to the CSV file
+    if (!data.empty()) {
+        size_t numColumns = data[0].size();
+        for (size_t i = 0; i < numColumns; ++i) {
+            file << "PC" << (i + 1); // Generate headers like PC1, PC2, ...
+            if (i < numColumns - 1) {
+                file << ","; // Add a comma between headers, but not after the last one
+            }
+        }
+        file << "\n"; // End the line after headers
+    }
+
+    // Write the data rows
     for (const auto& row : data) {
         for (size_t i = 0; i < row.size(); ++i) {
             file << row[i];
@@ -195,9 +208,9 @@ void writeToCSV(const Matrix& data, const string& filename) {
     file.close();
 
     if (file.fail()) {
-        std::cerr << "Error occurred while writing to the file: " << filename << std::endl;
+        cerr << "Error occurred while writing to the file: " << filename << endl;
     } else {
-        std::cout << "Data successfully written to " << filename << std::endl;
+        cout << "Data successfully written to " << filename << endl;
     }
 }
 
@@ -221,6 +234,8 @@ int main() {
     bool saveData = true; 
     bool printResults = false;
 
+    int numComponents = 3;  // Number of principal components to keep
+
     vector<string> barcodes;
     Matrix data;
 
@@ -230,7 +245,6 @@ int main() {
 
     data = standardizeData(data);
 
-    int numComponents = 3;  // Number of principal components to keep
     // pca(data, numComponents);
     auto [eigenVectors, eigenValues, result] = pca(data, numComponents);
 
