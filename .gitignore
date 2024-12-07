@@ -2,6 +2,7 @@
 .vscode
 test.py
 ignore/
+transformation_no_text.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

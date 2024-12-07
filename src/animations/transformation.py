@@ -30,6 +30,22 @@ class LinearTransformationSceneExample(LinearTransformationScene):
         group = VGroup(bg, text)
         return group
 
+    def add_mathtex_with_background(self, mathtex, position=DOWN, scale=0.8, bg_color=BLACK, bg_opacity=0.7):
+        """
+        Add MathTex with a background rectangle.
+        """
+        mathtex.scale(scale)
+        mathtex.to_edge(position)
+        bg = Rectangle(
+            width=mathtex.get_width() + 0.2,
+            height=mathtex.get_height() + 0.2,
+            color=bg_color,
+            fill_opacity=bg_opacity,
+            stroke_opacity=0
+        ).move_to(mathtex)
+        group = VGroup(bg, mathtex)
+        return group
+
     def construct(self):
         # Generate clusters
         cluster1 = np.random.multivariate_normal(
@@ -56,8 +72,10 @@ class LinearTransformationSceneExample(LinearTransformationScene):
         # Step 1: Project data onto x-axis
         text1 = self.add_text_with_background(Tex("Step 1: Project data onto x-axis"))
         self.play(FadeIn(text1))
-        equation1 = MathTex("X_{\\text{projected}} = [x, 0]").next_to(text1, DOWN)
-        self.play(Write(equation1))
+        equation1 = self.add_mathtex_with_background(
+            MathTex("X_{\\text{projected}} = [x, 0]")
+        )
+        self.play(FadeIn(equation1))
 
         x_projected_points = np.array([[x, 0] for x, _ in points])
         x_projected_dots = VGroup(
@@ -81,8 +99,10 @@ class LinearTransformationSceneExample(LinearTransformationScene):
         # Step 3: Project data onto y-axis
         text3 = self.add_text_with_background(Tex("Step 3: Project data onto y-axis"))
         self.play(Transform(text1, text3))
-        equation2 = MathTex("Y_{\\text{projected}} = [0, y]").next_to(text3, DOWN)
-        self.play(Write(equation2))
+        equation2 = self.add_mathtex_with_background(
+            MathTex("Y_{\\text{projected}} = [0, y]")
+        )
+        self.play(FadeIn(equation2))
 
         y_projected_points = np.array([[0, y] for x, y in points])
         y_projected_dots = VGroup(
@@ -109,8 +129,10 @@ class LinearTransformationSceneExample(LinearTransformationScene):
 
         centroid = np.mean(points, axis=0)
         centered_points = points - centroid
-        equation3 = MathTex("\\text{Centered Data:}", "\\ X_{\\text{centered}} = X - \\bar{X}").next_to(text5, DOWN)
-        self.play(Write(equation3))
+        equation3 = self.add_mathtex_with_background(
+            MathTex("X_{\\text{centered}} = X - \\bar{X}")
+        )
+        self.play(FadeIn(equation3))
 
         centered_dots = VGroup(
             *[
@@ -124,8 +146,10 @@ class LinearTransformationSceneExample(LinearTransformationScene):
         # Step 5: Compute covariance matrix
         text6 = self.add_text_with_background(Tex("Step 5: Compute covariance matrix"))
         self.play(Transform(text1, text6), FadeOut(equation3))
-        equation4 = MathTex("\\Sigma = \\frac{1}{n} X^T X").next_to(text6, DOWN)
-        self.play(Write(equation4))
+        equation4 = self.add_mathtex_with_background(
+            MathTex("C = \\frac{1}{n-1} X^T X")
+        )
+        self.play(FadeIn(equation4))
 
         covariance_matrix = np.cov(centered_points, rowvar=False)
         eigenvalues, eigenvectors = np.linalg.eig(covariance_matrix)
@@ -161,6 +185,7 @@ class LinearTransformationSceneExample(LinearTransformationScene):
         text8 = self.add_text_with_background(Tex("Step 7: Collapse data to original x-axis"))
         self.play(Transform(text1, text8))
         self.wait()
+
         self.apply_matrix((transformation_matrix / eigenvalues).T)
         self.wait()
 
@@ -172,3 +197,6 @@ class LinearTransformationSceneExample(LinearTransformationScene):
         )
         self.play(Transform(initial_dots, collapsed_dots))
         self.wait()
+
+        text9 = self.add_text_with_background(Tex("Clusters are easily distinguishable"))
+        self.play(Transform(text1, text9))
