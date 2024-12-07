@@ -178,8 +178,6 @@ if __name__ == "__main__":
     
     print("Starting PCA Python")
 
-    start_time = time.perf_counter()
-
     # data = [
     #     [2.5, 2.4, 0.5],
     #     [0.5, 0.7, 0.3],
@@ -204,8 +202,12 @@ if __name__ == "__main__":
         print(f"Error converting data to numeric: {e}")
         sys.exit(1)
 
+    start_time = time.perf_counter()
+
     # Perform PCA keeping all components
     projectedData, eigenValues, eigenVectors = pca(data,2)
+
+    end_time = time.perf_counter()
 
     if(printResults):
         print("\nProjected Data:")
@@ -219,7 +221,5 @@ if __name__ == "__main__":
         for vec in eigenVectors:
             print(vec)
 
-    end_time = time.perf_counter()
-
     elapsed_time = end_time - start_time
-print(f"Python took {elapsed_time:.6f} seconds to finish.")
+    print(f"Python took {elapsed_time:.6f} seconds to finish.")

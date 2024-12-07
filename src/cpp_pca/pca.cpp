@@ -218,8 +218,6 @@ int main() {
 
     cout << "Starting PCA C++" << "\n";
 
-    auto start = chrono::high_resolution_clock::now();
-
     // Example data matrix (4 samples, 3 features)
     // Matrix data = {
     //     {2.5, 2.4, 3.1},
@@ -243,11 +241,15 @@ int main() {
         return 1;
     }
 
+
+    auto start = chrono::high_resolution_clock::now();
+
     data = standardizeData(data);
 
     // pca(data, numComponents);
     auto [eigenVectors, eigenValues, result] = pca(data, numComponents);
 
+    auto end = chrono::high_resolution_clock::now();
 
     if(printResults == true){
         // Output the PCA result
@@ -280,9 +282,6 @@ int main() {
         cout << "Saving data... \n";
         writeToCSV(result,filename);
     }
-
-
-    auto end = chrono::high_resolution_clock::now();
 
     std::chrono::duration<double> elapsed = end - start;
 
