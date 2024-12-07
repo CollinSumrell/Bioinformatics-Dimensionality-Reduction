@@ -192,6 +192,33 @@ bool readCSV(const string& filename, Matrix& data, vector<string> barcodes, bool
     return true;
 }
 
+void writeToCSV(const Matrix& data, const string& filename) {
+    ofstream file(filename);
+
+    if (!file.is_open()) {
+        cerr << "Failed to open the file: " << filename << std::endl;
+        return;
+    }
+
+    for (const auto& row : data) {
+        for (size_t i = 0; i < row.size(); ++i) {
+            file << row[i];
+            if (i < row.size() - 1) {
+                file << ","; // Add a comma between elements, but not after the last one
+            }
+        }
+        file << "\n"; // End the line after each row
+    }
+
+    file.close();
+
+    if (file.fail()) {
+        std::cerr << "Error occurred while writing to the file: " << filename << std::endl;
+    } else {
+        std::cout << "Data successfully written to " << filename << std::endl;
+    }
+}
+
 int main() {
 
     cout << "Starting PCA C++" << "\n";
@@ -209,6 +236,7 @@ int main() {
     string datasetName = "wine";
     bool skipFirstCol = false; //if the dataset has built in row names, then skip 
 
+    bool saveData = true;
     bool printResults = false;
 
     vector<string> barcodes;
@@ -218,7 +246,7 @@ int main() {
         return 1;
     }
 
-    int numComponents = 10;  // Number of principal components to keep
+    int numComponents = 3;  // Number of principal components to keep
     // pca(data, numComponents);
     auto [eigenVectors, eigenValues, result] = pca(data, numComponents);
 
@@ -248,12 +276,18 @@ int main() {
         }
     }
 
+    std::string filename = "results/" + datasetName + "_" + std::to_string(numComponents) + "_PCs.csv";
+
+    writeToCSV(result, filename);
+
+    //end of our program and stopping the stopwatch
+
     auto end = chrono::high_resolution_clock::now();
 
     std::chrono::duration<double> elapsed = end - start;
 
     // Output the elapsed time in seconds
-    std::cout << "Function took " << elapsed.count() << " seconds to execute." << std::endl;
+    std::cout << "Function took " << elapsed.count() << " seconds to execute." << endl;
 
     return 0;
 }
