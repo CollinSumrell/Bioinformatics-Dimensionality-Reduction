@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <Eigen/Dense>
+#include <chrono>
 
 using namespace std;
 
@@ -110,7 +111,9 @@ tuple<Matrix, vector<double>, Matrix> pca(const Matrix& data, int numComponents)
     }
 
     Eigen::VectorXd eigenvalues = eigensolver.eigenvalues();
+    cout << "Computed eigenvalues..." << "\n";
     Eigen::MatrixXd eigenvectors = eigensolver.eigenvectors();
+    cout << "Computed eigenvectors..." << "\n";
 
     Eigen::VectorXd sortedEigenvalues = eigenvalues.reverse();
     Eigen::MatrixXd sortedEigenvectors = eigenvectors.rowwise().reverse();
@@ -141,8 +144,7 @@ tuple<Matrix, vector<double>, Matrix> pca(const Matrix& data, int numComponents)
 
     return make_tuple(top_eigenvectors, eigenvalues_vec, transformedDataMatrix);
 }
-
-bool readCSV(const string& filename, Matrix& data) {
+bool readCSV(const string& filename, Matrix& data, vector<string> barcodes, bool skipFirstCol) {
     cout << "Opening CSV: " << filename << "\n";
 
     ifstream file(filename); // Open the CSV file
@@ -162,10 +164,14 @@ bool readCSV(const string& filename, Matrix& data) {
         string cell;
         vector<double> row; //stores each split in numeric
 
-        bool firstCell = true; //flag to skip the first cell
+
+        bool skipFirstCol = true; //flag to skip the first cell
         while (getline(ss, cell, ',')) { //split by comma
-            if (firstCell) {
-                firstCell = false; //skip the first cell in the row
+            if (skipFirstCol) {
+
+                barcodes.push_back(cell);
+
+                skipFirstCol = false; //skip the first cell in the row
                 continue;
             }
             try {
@@ -187,6 +193,11 @@ bool readCSV(const string& filename, Matrix& data) {
 }
 
 int main() {
+
+    cout << "Starting PCA C++" << "\n";
+
+    auto start = chrono::high_resolution_clock::now();
+
     // Example data matrix (4 samples, 3 features)
     // Matrix data = {
     //     {2.5, 2.4, 3.1},
@@ -195,43 +206,54 @@ int main() {
     //     {1.9, 2.2, 2.8}
     // };
 
+    string datasetName = "wine";
+    bool skipFirstCol = false; //if the dataset has built in row names, then skip 
 
+    bool printResults = false;
+
+    vector<string> barcodes;
     Matrix data;
-    if (!readCSV("datasets/csv/cells_CRC_0_A1_20220122143309lib1_z.csv", data)) {
+
+    if (!readCSV("datasets/csv/" + datasetName + ".csv", data, barcodes, skipFirstCol)) {
         return 1;
     }
-
-    cout << "data00: " << data[0][0] << "\n";
-    cout << "Starting PCA" << "\n";
-
-    
 
     int numComponents = 10;  // Number of principal components to keep
     // pca(data, numComponents);
     auto [eigenVectors, eigenValues, result] = pca(data, numComponents);
 
-    // Output the PCA result
-    cout << "Eigenvectors:\n";
-    for (const auto& vec : eigenVectors) {
-        for (double val : vec) {
+
+    if(printResults == true){
+        // Output the PCA result
+        cout << "Eigenvectors:\n";
+        for (const auto& vec : eigenVectors) {
+            for (double val : vec) {
+                cout << val << " ";
+            }
+            cout << endl;
+        }
+
+        cout << "\nEigenvalues:\n";
+        for (double val : eigenValues) {
             cout << val << " ";
         }
         cout << endl;
-    }
 
-    cout << "\nEigenvalues:\n";
-    for (double val : eigenValues) {
-        cout << val << " ";
-    }
-    cout << endl;
-
-    cout << "\nPCA Transformed Data (First " << numComponents << " Components):\n";
-    for (const auto& row : result) {
-        for (double value : row) {
-            cout << value << " ";
+        cout << "\nPCA Transformed Data (First " << numComponents << " Components):\n";
+        for (const auto& row : result) {
+            for (double value : row) {
+                cout << value << " ";
+            }
+            cout << endl;
         }
-        cout << endl;
     }
+
+    auto end = chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double> elapsed = end - start;
+
+    // Output the elapsed time in seconds
+    std::cout << "Function took " << elapsed.count() << " seconds to execute." << std::endl;
 
     return 0;
 }

@@ -7,16 +7,15 @@
 
 # feature index (row) | barcode index (col) | count
 
-### What this file does: 
-
-# This 
-
 import csv
 from pathlib import Path
 
 #construct the path
-datasetPath = Path(__file__).parent.parent.parent / "datasets" 
-binPath = Path(__file__).parent.parent.parent / "bin"
+
+datasetName = "3KLung"
+
+datasetPath = Path(__file__).parent.parent.parent / "datasets" / "raw" / datasetName / "filtered_feature_bc_matrix"
+csvPath = Path(__file__).parent.parent.parent / "datasets" / "csv" 
 
 #loading barcodes (rows)
 with open(datasetPath / "barcodes.tsv", "r") as f:
@@ -75,9 +74,7 @@ with open(datasetPath / "matrix.mtx", "r") as f:
     
     print("Finished reading matrix.mtx")
 
-csvPath = binPath / "matrix.csv"
-
-with open(csvPath, mode = "w", newline='') as csvfile:
+with open(csvPath / datasetName + ".csv", mode = "w", newline='') as csvfile:
     writer = csv.writer(csvfile)
     
     # Write the header (feature names as columns)
@@ -87,5 +84,5 @@ with open(csvPath, mode = "w", newline='') as csvfile:
     for i, barcode in enumerate(barcodes):
         writer.writerow([barcode] + matrix[i])
 
-    print(f"Matrix written to {binPath}")
+    print(f"Matrix written to {csvPath / datasetName + ".csv"}")
 

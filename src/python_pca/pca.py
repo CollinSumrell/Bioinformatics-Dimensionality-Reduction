@@ -4,6 +4,8 @@ import csv
 
 from pathlib import Path
 
+import time
+
 # Add the utils folder to the Python path
 #sys.path.append(str(Path(__file__).resolve().parent.parent / "utils"))
 
@@ -99,7 +101,7 @@ def deflate(matrix, eigenValue, eigenVector):
             matrix[i][j] -= eigenValue * eigenVector[i] * eigenVector[j]
     return matrix
 
-def readCSV(csvName):
+def readCSV(csvName, skipFirstCol):
     # Initialize an empty list to store rows
     data = []
     features = []
@@ -112,8 +114,12 @@ def readCSV(csvName):
         features = next(reader)
 
         for row in reader:
-            barcodes.append(row[0])
-            data.append(row[1:])  # Append each row as a list
+            
+            if skipFirstCol:
+                barcodes.append(row[0])
+                data.append(row[1:]) 
+            else:
+                data.append(row)  # Append each row as a list
     
     return data, barcodes, features
 
@@ -170,8 +176,10 @@ def pca(data, numComponents=None):
 
 if __name__ == "__main__":
     
-    #TODO: Load in a csv from 10x
-    print("start")
+    print("Starting PCA Python")
+
+    start_time = time.perf_counter()
+
     # data = [
     #     [2.5, 2.4, 0.5],
     #     [0.5, 0.7, 0.3],
@@ -180,11 +188,15 @@ if __name__ == "__main__":
     #     [3.1, 3.0, 0.9]
     # ]
 
-    datasetPath = Path(__file__).parent.parent.parent.parent / "datasets" / "csv"
-    binPath = Path(__file__).parent.parent.parent.parent / "bin"
+    printResults = False
+
+    skipFirstCol = False
+    datasetName = "wine.csv"
+    datasetPath = Path(__file__).parent.parent.parent / "datasets" / "csv"
+    binPath = Path(__file__).parent.parent.parent / "bin"
 
 
-    data, barcodes, features = readCSV(datasetPath / "cells_CRC_0_A1_20220122143309lib1_z.csv")
+    data, barcodes, features = readCSV(datasetPath / datasetName, skipFirstCol)
 
     try: #converting our data to numeric since for some reason it comes in string form when we read it from the CSV
         data = [[float(value) for value in row] for row in data]
@@ -192,21 +204,22 @@ if __name__ == "__main__":
         print(f"Error converting data to numeric: {e}")
         sys.exit(1)
 
-    print(data[1])
-
-    print(data[1])
-
     # Perform PCA keeping all components
     projectedData, eigenValues, eigenVectors = pca(data,2)
 
+    if(printResults):
+        print("\nProjected Data:")
+        for row in projectedData:
+            print(row)
 
-    print("\nProjected Data:")
-    for row in projectedData:
-        print(row)
+        print("\nEigenvalues:")
+        print(eigenValues)
 
-    print("\nEigenvalues:")
-    print(eigenValues)
+        print("\nEigenvectors:")
+        for vec in eigenVectors:
+            print(vec)
 
-    print("\nEigenvectors:")
-    for vec in eigenVectors:
-        print(vec)
+    end_time = time.perf_counter()
+
+    elapsed_time = end_time - start_time
+print(f"Python took {elapsed_time:.6f} seconds to finish.")

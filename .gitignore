@@ -1,5 +1,5 @@
 # PROJECT SPECIFIC STUFF
-
+.vscode
 bin
 test.py
 datasets
