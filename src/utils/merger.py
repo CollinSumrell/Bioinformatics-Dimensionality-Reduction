@@ -23,7 +23,7 @@ def append_column_to_csv(source_csv, target_csv):
     target_data.to_csv(target_csv, index=False)
     print(f"Appended column from {source_csv} to {target_csv} and saved.")
 
-datasetName = "wine"
+datasetName = "proteindata"
 
 sourcePath = Path(__file__).parent.parent.parent / "results" / f"{datasetName}_clusters.csv"
 targetPath = Path(__file__).parent.parent.parent / "results" / f"{datasetName}_3_PCs.csv"

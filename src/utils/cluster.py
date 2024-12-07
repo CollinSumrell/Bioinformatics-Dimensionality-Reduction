@@ -4,7 +4,7 @@ from sklearn.preprocessing import StandardScaler
 from pathlib import Path
 
 # Construct the paths
-datasetName = "wine"
+datasetName = "proteindata"
 datasetPath = Path(__file__).parent.parent.parent / "datasets" / "csv" / datasetName
 outputPath = Path(__file__).parent.parent.parent / "results" / datasetName
 

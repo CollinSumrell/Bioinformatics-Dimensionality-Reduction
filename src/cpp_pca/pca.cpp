@@ -71,7 +71,7 @@ Matrix standardizeData(const Matrix& data) {
 
 // Function to perform PCA using the covariance matrix (simplified, assumes diagonalization is possible)
 tuple<Matrix, vector<double>, Matrix> pca(const Matrix& data, int numComponents) {
-    cout << "Start of PCA function";
+    cout << "Start of PCA function" << endl;
 
     int n = data.size();  // Number of data points
     int m = data[0].size();  // Number of features
@@ -226,7 +226,7 @@ int main() {
     //     {1.9, 2.2, 2.8}
     // };
 
-    string datasetName = "wine";
+    string datasetName = "proteindata";
     bool skipFirstCol = false; //if the dataset has built in row names, then skip 
 
     bool saveData = true; 
