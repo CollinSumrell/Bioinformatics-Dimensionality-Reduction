@@ -11,6 +11,7 @@ from pathlib import Path
 datasetName = "wine"
 
 datasetPath = Path(__file__).parent.parent.parent / "datasets" / "csv" / datasetName
+outputPath = Path(__file__).parent.parent.parent / "results" / datasetName
 
 data = pd.read_csv(str(datasetPath) + ".csv")
 
@@ -32,6 +33,6 @@ kmeans.fit(scaled_data)
 data["Cluster"] = kmeans.labels_
 
 # Save the data with cluster labels to a new CSV file
-data.to_csv(str(datasetPath) + "_clusters.csv", index=False)
+data.to_csv(str(outputPath) + "_clusters.csv", index=False)
 
 print("Clustering complete. Results saved to 'clustered_data.csv'.")
