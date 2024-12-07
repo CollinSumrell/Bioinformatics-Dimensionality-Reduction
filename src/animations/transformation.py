@@ -20,9 +20,15 @@ class LinearTransformationSceneExample(LinearTransformationScene):
         """
         text.scale(scale)
         text.to_edge(position)
-        bg=Rectangle(width=text.get_width()+0.2, height=text.get_height()+0.2, color=bg_color, fill_opacity=bg_opacity, stroke_opacity=0).move_to(text)
+        bg = Rectangle(
+            width=text.get_width() + 0.2,
+            height=text.get_height() + 0.2,
+            color=bg_color,
+            fill_opacity=bg_opacity,
+            stroke_opacity=0
+        ).move_to(text)
         group = VGroup(bg, text)
-        return(group)
+        return group
 
     def construct(self):
         # Generate clusters
@@ -47,10 +53,12 @@ class LinearTransformationSceneExample(LinearTransformationScene):
         self.add(initial_dots)
         self.wait()
 
-        text1 = self.add_text_with_background(Tex("Project data onto x-axis"))
+        # Step 1: Project data onto x-axis
+        text1 = self.add_text_with_background(Tex("Step 1: Project data onto x-axis"))
         self.play(FadeIn(text1))
+        equation1 = MathTex("X_{\\text{projected}} = [x, 0]").next_to(text1, DOWN)
+        self.play(Write(equation1))
 
-        # Project onto x-axis
         x_projected_points = np.array([[x, 0] for x, _ in points])
         x_projected_dots = VGroup(
             *[
@@ -61,18 +69,21 @@ class LinearTransformationSceneExample(LinearTransformationScene):
         self.play(Transform(initial_dots, x_projected_dots))
         self.wait()
 
-        text2 = self.add_text_with_background(Tex("Can't distinguish clusters"))
-        self.play(Transform(text1, text2))
+        # Step 2: Explain lack of distinguishability
+        text2 = self.add_text_with_background(Tex("Clusters are indistinguishable"))
+        self.play(Transform(text1, text2), FadeOut(equation1))
         self.wait(3)
 
         # Undo x-axis projection
         self.play(Transform(initial_dots, original_dots))
         self.wait()
 
-        text3 = self.add_text_with_background(Tex("Project data onto y-axis"))
+        # Step 3: Project data onto y-axis
+        text3 = self.add_text_with_background(Tex("Step 3: Project data onto y-axis"))
         self.play(Transform(text1, text3))
+        equation2 = MathTex("Y_{\\text{projected}} = [0, y]").next_to(text3, DOWN)
+        self.play(Write(equation2))
 
-        # Project onto y-axis
         y_projected_points = np.array([[0, y] for x, y in points])
         y_projected_dots = VGroup(
             *[
@@ -83,35 +94,48 @@ class LinearTransformationSceneExample(LinearTransformationScene):
         self.play(Transform(initial_dots, y_projected_dots))
         self.wait()
 
-        text4 = self.add_text_with_background(Tex("Still can't distinguish clusters"))
-        self.play(Transform(text1, text4))
+        # Explain lack of distinguishability
+        text4 = self.add_text_with_background(Tex("Clusters are still indistinguishable"))
+        self.play(Transform(text1, text4), FadeOut(equation2))
         self.wait(3)
 
         # Undo y-axis projection
         self.play(Transform(initial_dots, original_dots))
         self.wait()
 
-        # Calculate the centroid
-        centroid = np.mean(points, axis=0)
+        # Step 4: Center the data
+        text5 = self.add_text_with_background(Tex("Step 4: Center the data"))
+        self.play(Transform(text1, text5))
 
-        # Center the data
+        centroid = np.mean(points, axis=0)
         centered_points = points - centroid
+        equation3 = MathTex("\\text{Centered Data:}", "\\ X_{\\text{centered}} = X - \\bar{X}").next_to(text5, DOWN)
+        self.play(Write(equation3))
+
         centered_dots = VGroup(
             *[
                 Dot(self.plane.coords_to_point(x, y), color=YELLOW)
                 for x, y in centered_points
             ]
         )
-
-        # Animate from initial to centered positions
         self.play(Transform(initial_dots, centered_dots))
         self.wait()
 
-        # Calculate covariance matrix and eigenvalues/eigenvectors
+        # Step 5: Compute covariance matrix
+        text6 = self.add_text_with_background(Tex("Step 5: Compute covariance matrix"))
+        self.play(Transform(text1, text6), FadeOut(equation3))
+        equation4 = MathTex("\\Sigma = \\frac{1}{n} X^T X").next_to(text6, DOWN)
+        self.play(Write(equation4))
+
         covariance_matrix = np.cov(centered_points, rowvar=False)
         eigenvalues, eigenvectors = np.linalg.eig(covariance_matrix)
+        self.wait()
 
-        # Display eigenvectors
+        # Step 6: Rotate data to PC space
+        text7 = self.add_text_with_background(Tex("Step 6: Rotate data to PC space"))
+        self.play(Transform(text1, text7), FadeOut(equation4))
+        self.wait()
+
         vectors = VGroup()
         for eigenvalue, eigenvector in zip(eigenvalues, eigenvectors.T):
             direction = eigenvector * np.sqrt(eigenvalue)
@@ -129,25 +153,22 @@ class LinearTransformationSceneExample(LinearTransformationScene):
         for dot in initial_dots:
             self.add_moving_mobject(dot)
 
-        # Apply linear transformation (eigenbasis)
         transformation_matrix = eigenvectors * np.sqrt(eigenvalues)
         self.apply_matrix(transformation_matrix)
-
-        # Keep everything visible after transformation
         self.wait()
 
+        # Step 7: Collapse to original x-axis
+        text8 = self.add_text_with_background(Tex("Step 7: Collapse data to original x-axis"))
+        self.play(Transform(text1, text8))
+        self.wait()
         self.apply_matrix((transformation_matrix / eigenvalues).T)
-
         self.wait()
 
-        # Collapse points vertically to the x-axis
         collapsed_dots = VGroup(
             *[
                 Dot(self.plane.coords_to_point(self.plane.point_to_coords(dot.get_center())[0], 0), color=YELLOW)
                 for dot in initial_dots
             ]
         )
-
-        # Animate points collapsing to the x-axis
         self.play(Transform(initial_dots, collapsed_dots))
         self.wait()
