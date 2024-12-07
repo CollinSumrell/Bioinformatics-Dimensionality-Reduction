@@ -86,8 +86,35 @@ vector<double> normalize(const vector<double>& vec) {
     return normalized;
 }
 
+Matrix normalizeData(const Matrix& data) {
+    int n = data.size();    // Number of rows (samples)
+    int m = data[0].size(); // Number of columns (features)
+
+    Matrix normalizedData = data;
+
+    for (int j = 0; j < m; ++j) {
+        // Extract column as a vector
+        vector<double> column(n);
+        for (int i = 0; i < n; ++i) {
+            column[i] = data[i][j];
+        }
+
+        // Normalize the column
+        vector<double> normalizedColumn = normalize(column);
+
+        // Assign the normalized values back
+        for (int i = 0; i < n; ++i) {
+            normalizedData[i][j] = normalizedColumn[i];
+        }
+    }
+
+    return normalizedData;
+}
+
 // Function to perform PCA using the covariance matrix (simplified, assumes diagonalization is possible)
 tuple<Matrix, vector<double>, Matrix> pca(const Matrix& data, int numComponents) {
+    cout << "Start of PCA function";
+
     int n = data.size();  // Number of data points
     int m = data[0].size();  // Number of features
 
@@ -246,6 +273,8 @@ int main() {
         return 1;
     }
 
+    data = normalizeData(data);
+
     int numComponents = 3;  // Number of principal components to keep
     // pca(data, numComponents);
     auto [eigenVectors, eigenValues, result] = pca(data, numComponents);
@@ -279,6 +308,7 @@ int main() {
     string filename = "results/" + datasetName + "_" + std::to_string(numComponents) + "_PCs.csv";
 
     if(saveData){
+        cout << "Saving data... \n";
         writeToCSV(result,filename);
     }
 

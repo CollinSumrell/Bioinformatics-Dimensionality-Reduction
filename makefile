@@ -6,7 +6,7 @@ CXXFLAGS = -std=c++17 -O2 -Wall
 
 # Directories
 INCLUDES = -I /opt/homebrew/include/eigen3 -I$(SRC_DIR)/include  # Include the directory where CSVReader.h is located
-SRC_DIR = src/cpp_pca
+SRC_DIR = src/cpp-pca
 OBJ_DIR = $(SRC_DIR)/obj
 BIN_DIR = bin
 
