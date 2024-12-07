@@ -11,19 +11,15 @@ import random
 class PCA3DVisualization(ThreeDScene):
     def construct(self):
         # Import data
-        datapoints_df = pd.read_csv('datapoints.csv')
-        clusters_df = pd.read_csv('clusters.csv')
-
-        # Join the dataframes on the barcode
-        merged_df = pd.merge(datapoints_df, clusters_df, on='barcode')
+        datapoints_df = pd.read_csv('results/wine_3_PCs.csv')
 
         # Sample 200 points for visualization.
         # we don't want to plot every single point because it would be too cluttered
-        sampled_df = merged_df.sample(n=200, random_state=42)
+        sampled_df = datapoints_df.sample(n=200, random_state=42)
 
         # Extract the proper columns
-        data = sampled_df[["pc1", "pc2", "pc3"]].values
-        clusters = sampled_df["cluster"].values
+        data = sampled_df[["PC1", "PC2", "PC3"]].values
+        clusters = sampled_df["Cluster"].values
 
         # Define colors for clusters
         cluster_colors = [
@@ -98,10 +94,12 @@ class PCA3DVisualization(ThreeDScene):
         # Get rid of the plane, have the points move to their projections
         self.play(
             FadeOut(plane),
+            FadeOut(projection_lines),
             ReplacementTransform(points, projected_points),
             run_time=2
         )
         self.wait(1)
+        self.stop_ambient_camera_rotation()
 
         # Make 2D axes and projected points
         axes2d = Axes(
