@@ -33,29 +33,37 @@ This project was developed to:
 
 ## Requirements
 
-Python: Version 3.8+
+**Note:** This has only been tested on macOS 14.4+. If you don't have a Mac available to you, we've pre-rendered and pre-run all animations and PCA on the datasets. You can find where to locate those under the Layout header.
 
-- Required Libraries: numpy, scikit-learn (for clustering), pandas
+- Python: Version 3.8+
+  - Required Libraries: numpy, scikit-learn (for clustering), pandas
 - C++ Compiler: Supporting C++17 or higher
 - R (optional): For data preprocessing
+- Homebrew
 
 ---
 
 ## Installation
 
 Clone the repository:
-git clone https://github.com/yourusername/pca-visualizer.git  
-cd pca-visualizer  
-Install dependencies (Python):
+
+```bash
+git clone https://github.com/CollinSumrell/Bioinformatics-Dimensionality-Reduction.git
+cd pca-visualizer
+```
+
+(alternatively, you can just download the ZIP)
+
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
+brew install eigen
 ```
 
 Build the C++ PCA implementation (if using):
 
 ```bash
-cd cpp/
 make
 ```
 
@@ -67,12 +75,16 @@ Preprocess your dataset if necessary (see /utils/preprocessing for scripts).
 Run the Python or C++ PCA implementation on your dataset:
 
 ```bash
-make
+make # for C++
 ```
+
+For the Python implementation, just navigate to that file and run the script.
+
+You'll need to specify the path to your dataset in the C++ and Python files, respectively.
 
 ## Generating Animations
 
-First, follow the instructions (here)[https://docs.manim.community/en/stable/installation.html] to install manim.
+First, follow the instructions [here](https://docs.manim.community/en/stable/installation.html) to install Manim.
 
 Use the clustering utility to generate clustering data if needed:
 
@@ -81,3 +93,13 @@ manim -qh src/animations/<filename>.py
 ```
 
 `h` in the above terminal command can be replaced with `l`, `m`, `h`, or `k` for 480p, 720p, 1080p, or 4K resolution, respectively.
+
+## Layout
+
+- Source files for the animations can be found under `/src/animations`
+  - Pre-rendered versions are under `/media/videos`
+- Source files for the PCA implementations are under `/src/cpp_pca` and `/src/python_pca/`
+- Python and R utilities to help assemble the datasets, resize them, and merge CSVs can be found under `/src/utils`
+- The datasets that we ran PCA on are under `/datasets/csv`
+- The results of our C++ PCA implementation can be found under `/results/`
+  - A Python script that calculates statistics on the PCA output can also be found here. It was used for troubleshooting during development, primarily around how we were standardizing/normalizing the data/results.
