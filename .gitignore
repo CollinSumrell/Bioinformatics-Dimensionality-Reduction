@@ -3,6 +3,9 @@
 test.py
 ignore/
 transformation_no_text.py
+Tex/
+texts/
+partial_movie_files/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -166,5 +169,4 @@ cython_debug/
 #.idea/
 
 # Ignore generated media files and whatever weird DS_Store stuff macOS makes
-media/
 .DS_Store
