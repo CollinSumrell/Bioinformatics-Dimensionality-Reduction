@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from prince import PCA as PrincePCA
 from pathlib import Path
 
-datasetName = "wine.csv"
+datasetName = "proteindata.csv"
 datasetPath = Path(__file__).parent.parent.parent / "datasets" / "csv"
 
 numComponents = 3  # This should be used with PCA, not StandardScaler

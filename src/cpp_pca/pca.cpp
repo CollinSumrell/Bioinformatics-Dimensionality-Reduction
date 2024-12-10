@@ -226,7 +226,7 @@ int main() {
     //     {1.9, 2.2, 2.8}
     // };
 
-    string datasetName = "proteindata";
+    string datasetName = "wine";
     bool skipFirstCol = false; //if the dataset has built in row names, then skip 
 
     bool saveData = true; 
